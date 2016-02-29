@@ -1,4 +1,7 @@
 a=$(iostat -c 15 1 | grep -A 1 "%idle" | awk 'NR>1' | awk '{print $6}')
+nagioscheck=0
+
+#function taken from http://www.linuxjournal.com/content/floating-point-math-bash
 function float_eval()
 {
     local stat=0
@@ -11,6 +14,8 @@ function float_eval()
     echo $result
     return $stat
 }
+
+#function taken from http://www.linuxjournal.com/content/floating-point-math-bash
 function float_cond()
 {
     local cond=0
@@ -24,9 +29,17 @@ function float_cond()
 }
 
 if $(float_cond '$a > 5.00'); then
-	echo "warning: $a"
+	if [[ $nagioscheck == 1 ]]; then 
+	    echo "1"
+	else
+ 	    echo "Warning :: CPU @ $a"
+	fi
 else
-	echo "ok $a"
+	if [[ $nagioscheck == 1 ]]; then 
+	    echo "0"
+	else
+ 	    echo "ok $a"
+	fi
 fi
 
 
