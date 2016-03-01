@@ -28,6 +28,24 @@ function float_cond()
     return $stat
 }
 
+function report_bad()
+{
+if [[ $nagioscheck == 1 ]]; then
+    echo "1"
+else
+    echo "Warning :: CPU @ $a"
+fi
+}
+
+report_good()
+{
+if [[ $nagioscheck == 1 ]]; then
+   echo "0"
+else
+   echo "ok $a"
+fi
+}
+
 if $(float_cond '$a > 5.00'); then
 	if [[ $nagioscheck == 1 ]]; then 
 	    echo "1"
@@ -42,4 +60,11 @@ else
 	fi
 fi
 
+zProcs=$(ps aux | awk '{ print $8 " " $2 }' | grep -w Zz)
+
+if [ $zProcs ]; then
+   report_bad
+else
+   report_good
+fi
 
