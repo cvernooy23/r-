@@ -33,38 +33,38 @@ function report_bad()
 if [[ $nagioscheck == 1 ]]; then
     echo "1"
 else
-    echo "Warning :: CPU @ $a"
+    echo "Warning :: $error"
 fi
 }
 
-report_good()
+function report_good()
 {
 if [[ $nagioscheck == 1 ]]; then
    echo "0"
 else
-   echo "ok $a"
+   echo "OK: $check"
 fi
 }
 
+##CPU Check if not suing a monitor system or if not included or not working right##
 if $(float_cond '$a > 5.00'); then
-	if [[ $nagioscheck == 1 ]]; then 
-	    echo "1"
-	else
- 	    echo "Warning :: CPU @ $a"
-	fi
+   perc=$(bc <<< "100-$a")
+   error="CPU @ $perc%"
+   report_bad
 else
-	if [[ $nagioscheck == 1 ]]; then 
-	    echo "0"
-	else
- 	    echo "ok $a"
-	fi
+   perc=$(bc <<< "100-$a")
+   check="CPU @ $perc%"
+   report_good
 fi
 
+##Check for zombie procs and output##
 zProcs=$(ps aux | awk '{ print $8 " " $2 }' | grep -w Zz)
 
 if [ $zProcs ]; then
+   error="Zombie processes detected, use kill -9 to kill. $zProcs"
    report_bad
 else
+   check="No Zombie procs detected"
    report_good
 fi
 
