@@ -46,7 +46,7 @@ else
 fi
 }
 
-##CPU Check if not suing a monitor system or if not included or not working right##
+##CPU Check if not using a monitor system or if not included or not working right##
 if $(float_cond '$a > 5.00'); then
    perc=$(bc <<< "100-$a")
    error="CPU @ $perc%"
@@ -67,4 +67,25 @@ else
    check="No Zombie procs detected"
    report_good
 fi
+
+##Check for diskspace##
+badDiskAr=()
+i=0
+for d in $(df -H | awk 'NR>1' | awk '{print $5}'); do 
+   if [ `echo $d | tr -d .% > 85` ]; then 
+       #badDiskAr[$i]=`echo "$d"`
+       if [ $i == 0 ]; then        
+          error="Partition `df -H | awk 'NR>1' | head -1 | awk '{print $6 "/" $1}'` is @ $d"
+          report_bad
+       else
+          ci=$i+1
+          error="Partition `df -H | awk 'NR>1' | head -$ci | tail -1 | awk '{print $6 "/" $1}'` is @ $d"
+          report_bad
+       fi
+   else
+       check="Partition `df -H | awk 'NR>1' | grep $d | awk '{print $6}'` is @ $d"
+       report_good
+   fi
+   let i+=1
+done
 
